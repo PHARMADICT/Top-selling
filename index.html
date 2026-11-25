@@ -1,0 +1,1193 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a1e3c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="VYSAKH Sales">
+  <title>VYSAKH Sales Tracker</title>
+  <link rel="manifest" href="./manifest.json">
+  <style>
+    :root {
+      --navy:#0a1e3c;
+      --green:#2b9e6e;
+      --green-dark:#21865c;
+      --bg:#f0f4fb;
+      --card:#fff;
+      --text:#17243a;
+      --muted:#718096;
+      --border:#e3e9f2;
+      --red:#d94c55;
+      --shadow:0 4px 18px rgba(10,30,60,.07);
+    }
+    * {box-sizing:border-box}
+    html {background:var(--bg);scroll-behavior:smooth}
+    body {
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+      -webkit-tap-highlight-color:transparent;
+      user-select:none;
+      overscroll-behavior-y:none;
+      padding-bottom:calc(82px + env(safe-area-inset-bottom));
+    }
+    input,textarea,select {user-select:text;font:inherit}
+    button {font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+    .topbar {
+      position:sticky;top:0;z-index:20;
+      background:var(--navy);color:white;
+      padding:calc(12px + env(safe-area-inset-top)) 15px 12px;
+      box-shadow:0 3px 12px #07172b33;
+    }
+    .topline {display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .brand {font-size:18px;font-weight:850;letter-spacing:.3px}
+    .brand small {display:block;font-size:10px;opacity:.7;font-weight:500;letter-spacing:1.4px;margin-top:2px}
+    .online {font-size:11px;background:#ffffff18;border:1px solid #ffffff35;border-radius:30px;padding:6px 10px}
+    .online:before {content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#48d69a;margin-right:6px}
+    main {max-width:900px;margin:auto;padding:13px}
+    .page {display:none}
+    .page.active {display:block}
+    .section-title {font-size:17px;font-weight:800;margin:7px 0 12px}
+    .card {background:var(--card);border:1px solid var(--border);border-radius:15px;padding:13px;margin-bottom:12px;box-shadow:var(--shadow)}
+    .muted {color:var(--muted);font-size:12px}
+    .small {font-size:11px}
+    .row {display:flex;align-items:center;gap:8px}
+    .between {justify-content:space-between}
+    .wrap {flex-wrap:wrap}
+    .field {width:100%;min-width:0;border:1px solid var(--border);background:#f9fbfe;border-radius:9px;padding:10px;color:var(--text);outline:none}
+    .field:focus {border-color:var(--green);box-shadow:0 0 0 2px #2b9e6e20}
+    .field-label {display:block;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:5px}
+    .btn {border:0;border-radius:9px;padding:10px 13px;font-weight:750;font-size:12px;background:var(--navy);color:white}
+    .btn.green {background:var(--green)}
+    .btn.light {background:#edf2f8;color:var(--navy)}
+    .btn.red {background:#fff0f0;color:var(--red)}
+    .btn.small-btn {padding:7px 9px;font-size:11px}
+    .btn:active,.tile:active {transform:scale(.97)}
+    .store-tabs {display:flex;gap:7px;overflow-x:auto;padding:2px 0 9px;scrollbar-width:none}
+    .store-tabs::-webkit-scrollbar {display:none}
+    .store-tab {white-space:nowrap;border:1px solid var(--border);border-radius:30px;padding:8px 12px;background:white;color:var(--muted);font-size:11px;font-weight:750}
+    .store-tab.selected {background:var(--navy);color:white;border-color:var(--navy)}
+    .search-row {display:flex;gap:7px;margin:10px 0}
+    .search-row input {flex:1;min-width:0}
+    .chips {display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}
+    .chip {white-space:nowrap;border:1px solid var(--border);background:white;color:var(--muted);border-radius:20px;padding:7px 11px;font-size:10px;font-weight:800}
+    .chip.active {background:#e3f5ed;border-color:#a9dec6;color:#18794f}
+    .product-grid {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+    .tile {min-width:0;min-height:76px;text-align:left;border:1px solid var(--border);border-radius:11px;background:white;padding:8px 7px;box-shadow:0 2px 6px #10204008;transition:transform .15s,border .15s}
+    .tile:active {border-color:var(--green)}
+    .tile-brand {display:inline-block;background:#eaf0f8;color:var(--navy);font-size:9px;font-weight:850;border-radius:5px;padding:3px 5px;margin-bottom:5px}
+    .tile-name {font-size:10px;font-weight:800;line-height:1.25;display:block;min-height:25px;overflow-wrap:anywhere}
+    .tile-price {font-size:11px;color:var(--green-dark);font-weight:850;margin-top:5px;display:block}
+    .ledger-head {display:flex;align-items:center;justify-content:space-between;gap:8px;margin:16px 0 8px}
+    .ledger-head strong {font-size:14px}
+    .ledger-scroll {overflow-x:auto}
+    table {border-collapse:collapse;width:100%;min-width:720px;font-size:11px}
+    th {background:#edf2f8;color:#52627a;text-align:left;font-size:10px;padding:9px 7px;white-space:nowrap}
+    td {border-bottom:1px solid var(--border);padding:7px;vertical-align:middle}
+    td input {width:100%;min-width:50px;border:1px solid #e8edf4;border-radius:6px;padding:6px;font-size:11px;background:#fbfcfe}
+    td.item-cell input {min-width:155px}
+    .qty-control {display:flex;align-items:center;gap:4px}
+    .qty-control button {width:25px;height:27px;border:0;border-radius:6px;background:#edf2f8;color:var(--navy);font-weight:900}
+    .qty-control input {width:55px;text-align:center}
+    .date-block {margin-bottom:13px}
+    .date-banner {background:var(--navy);color:white;border-radius:11px 11px 0 0;padding:11px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+    .date-banner input {background:#ffffff18;border:1px solid #ffffff3b;color:white;border-radius:6px;padding:6px;max-width:150px;font-size:11px}
+    .date-banner input::placeholder {color:#ffffff99}
+    .date-banner .date-text {font-size:11px;font-weight:800}
+    .date-actions {display:flex;gap:5px}
+    .date-actions button {background:#ffffff20;color:white;border:1px solid #ffffff35;border-radius:6px;padding:6px 8px;font-size:10px;font-weight:800}
+    .subtotal {background:#e9f5ef;font-weight:850}
+    .grand-total {background:var(--navy);color:white;border-radius:12px;padding:14px;display:flex;justify-content:space-between;gap:10px;align-items:center}
+    .grand-total strong {font-size:19px}
+    .action-grid {display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px}
+    .action-grid .btn {padding:11px 5px}
+    .bottom-nav {
+      position:fixed;z-index:30;bottom:0;left:0;right:0;
+      display:grid;grid-template-columns:repeat(5,1fr);
+      padding:8px 5px calc(8px + env(safe-area-inset-bottom));
+      background:#fff;border-top:1px solid var(--border);
+      box-shadow:0 -5px 18px #0a1e3c0c;
+    }
+    .nav-btn {border:0;background:transparent;color:#8491a5;font-size:10px;font-weight:750;padding:6px 1px;display:flex;flex-direction:column;align-items:center;gap:4px}
+    .nav-btn .nav-icon {font-size:19px;line-height:20px}
+    .nav-btn.active {color:var(--green-dark)}
+    .stat-grid {display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+    .stat {background:#f7f9fc;border:1px solid var(--border);border-radius:12px;padding:12px}
+    .stat span {display:block;color:var(--muted);font-size:10px;font-weight:750}
+    .stat strong {display:block;font-size:19px;margin-top:6px}
+    .stat.green-stat strong {color:var(--green-dark)}
+    .history-item {border-bottom:1px solid var(--border);padding:12px 0}
+    .history-item:last-child {border:0}
+    .status {font-size:9px;font-weight:850;border-radius:20px;padding:5px 7px;background:#fff4dc;color:#9b6b14}
+    .status.sent {background:#e3f5ed;color:#18794f}
+    .empty {text-align:center;padding:28px 12px;color:var(--muted);font-size:12px}
+    .form-grid {display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .form-group {min-width:0}
+    .modal-backdrop {display:none;position:fixed;inset:0;z-index:50;background:#06152bd1;align-items:center;justify-content:center;padding:18px}
+    .modal-backdrop.show {display:flex}
+    .modal {width:100%;max-width:430px;max-height:85vh;overflow:auto;background:white;border-radius:17px;padding:17px}
+    .modal h3 {margin:0 0 14px;font-size:17px}
+    .modal-actions {display:flex;gap:8px;margin-top:15px}
+    .modal-actions>* {flex:1}
+    .toast {position:fixed;z-index:60;left:12px;right:12px;bottom:calc(78px + env(safe-area-inset-bottom));background:var(--navy);color:white;border-radius:13px;padding:12px 14px;box-shadow:0 8px 30px #0003;display:none}
+    .toast.show {display:block;animation:rise .2s ease-out}
+    @keyframes rise {from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    .toast-actions {display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+    .toast-actions button {border:1px solid #ffffff55;background:#ffffff18;color:white;border-radius:7px;padding:6px 9px;font-size:10px;font-weight:800}
+    .divider {height:1px;background:var(--border);margin:12px 0}
+    .product-row {display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid var(--border);padding:10px 0;font-size:12px}
+    .product-row:last-child {border:0}
+    .hidden {display:none!important}
+    @media(min-width:650px) {
+      main {padding:20px}
+      .product-grid {grid-template-columns:repeat(5,minmax(0,1fr))}
+      .tile {min-height:88px;padding:10px}
+      .tile-name {font-size:11px}
+      .stat-grid {grid-template-columns:repeat(4,1fr)}
+    }
+    @media(max-width:360px) {
+      .product-grid {gap:5px}
+      .tile {padding:6px 5px;min-height:72px}
+      .tile-name {font-size:9px}
+      .tile-price {font-size:10px}
+      main {padding:9px}
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topline">
+      <div class="brand">VYSAKH SALES TRACKER<small>SALES • INCENTIVES • REPORTS</small></div>
+      <div class="online" id="connectionBadge">ONLINE</div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ENTRIES -->
+    <section class="page active" id="page-entries">
+      <div class="section-title">Product Quick Entry</div>
+
+      <div class="card">
+        <div class="row between">
+          <strong style="font-size:13px">Select Store / Pharmacy</strong>
+          <button class="btn light small-btn" onclick="manageStores()">＋ Edit Stores</button>
+        </div>
+        <div class="store-tabs" id="storeTabs"></div>
+
+        <div class="search-row">
+          <input id="productSearch" class="field" placeholder="Search product or brand..." oninput="renderProducts()">
+          <button class="btn green" onclick="openProductModal()">＋ Tile</button>
+        </div>
+        <div class="chips" id="brandChips"></div>
+        <div class="product-grid" id="productGrid"></div>
+      </div>
+
+      <div class="ledger-head">
+        <strong>Sales Ledger</strong>
+        <button class="btn green small-btn" onclick="addDateBlock()">＋ Date</button>
+      </div>
+
+      <div class="card" style="padding:10px">
+        <div class="row between wrap">
+          <div>
+            <span class="field-label">INCENTIVE RATE (%)</span>
+            <input id="incentiveRate" class="field" type="number" min="1" max="100" step="0.01" value="10" style="width:105px" onchange="changeRate(this.value)">
+          </div>
+          <div style="text-align:right">
+            <span class="field-label">ALL-DATE SALES</span>
+            <strong id="topSalesTotal" style="font-size:18px">AED 0.00</strong>
+          </div>
+        </div>
+        <div class="action-grid">
+          <button class="btn light" onclick="pasteImport()">Paste Import</button>
+          <button class="btn light" onclick="copyAllWhatsApp()">WA All</button>
+          <button class="btn light" onclick="exportImage()">JPG Snapshot</button>
+          <button class="btn light" onclick="exportTSV()">Copy TSV</button>
+          <button class="btn light" onclick="exportCSV()">Export CSV</button>
+          <button class="btn light" onclick="addDateBlock()">＋ Date</button>
+        </div>
+      </div>
+
+      <div id="ledger"></div>
+      <div class="grand-total">
+        <div><span class="small">GRAND TOTAL SALES</span><br><strong id="grandSales">AED 0.00</strong></div>
+        <div style="text-align:right"><span class="small">TOTAL INCENTIVE</span><br><strong id="grandIncentive">AED 0.00</strong></div>
+      </div>
+    </section>
+
+    <!-- HISTORY -->
+    <section class="page" id="page-history">
+      <div class="section-title">History & Reconciliation</div>
+      <div class="card">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="field-label">REPORT SENT UP TO DATE</label>
+            <input class="field" id="sentUpTo" type="date" onchange="saveHistorySettings()">
+          </div>
+          <div class="form-group">
+            <label class="field-label">AMOUNT RECEIVED (AED)</label>
+            <input class="field" id="amountReceived" type="number" min="0" step="0.01" placeholder="0.00" onchange="saveHistorySettings()">
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="stat-grid">
+          <div class="stat green-stat"><span>TOTAL INCENTIVE</span><strong id="histIncentive">0.00</strong></div>
+          <div class="stat"><span>RECEIVED</span><strong id="histReceived">0.00</strong></div>
+          <div class="stat"><span>PENDING</span><strong id="histPending">0.00</strong></div>
+          <div class="stat"><span>TOTAL SALES</span><strong id="histSales">0.00</strong></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="row between">
+          <strong style="font-size:13px">Saved Sales Dates</strong>
+          <input type="month" id="historyMonth" class="field" style="width:145px" onchange="renderHistory()">
+        </div>
+        <div id="historyList"></div>
+      </div>
+      <div class="card">
+        <strong style="font-size:13px">Last Report Activity</strong>
+        <p class="muted" id="lastActivity">No report copied or shared yet.</p>
+      </div>
+    </section>
+
+    <!-- REPORTS -->
+    <section class="page" id="page-reports">
+      <div class="section-title">Reports & Performance</div>
+      <div class="card">
+        <div class="row between">
+          <strong style="font-size:13px">Report Period</strong>
+          <select class="field" id="reportPeriod" style="width:140px" onchange="renderReports()">
+            <option value="all">All time</option>
+            <option value="month">This month</option>
+            <option value="week">Last 7 days</option>
+          </select>
+        </div>
+        <div class="stat-grid" style="margin-top:12px">
+          <div class="stat"><span>TOTAL SALES</span><strong id="reportSales">0.00</strong></div>
+          <div class="stat green-stat"><span>INCENTIVE</span><strong id="reportIncentive">0.00</strong></div>
+          <div class="stat"><span>QUANTITY SOLD</span><strong id="reportQty">0</strong></div>
+          <div class="stat"><span>SALES DAYS</span><strong id="reportDays">0</strong></div>
+        </div>
+      </div>
+      <div class="card">
+        <strong style="font-size:13px">Top Products</strong>
+        <div id="topProducts"></div>
+      </div>
+      <div class="card">
+        <strong style="font-size:13px">Monthly Sales</strong>
+        <div id="monthlyReports"></div>
+      </div>
+    </section>
+
+    <!-- LIBRARY -->
+    <section class="page" id="page-library">
+      <div class="section-title">Product Master Library</div>
+      <div class="card">
+        <div class="row between">
+          <strong style="font-size:13px">Product Catalogue</strong>
+          <button class="btn green small-btn" onclick="openProductModal()">＋ Add Product</button>
+        </div>
+        <input id="librarySearch" class="field" placeholder="Search catalogue..." style="margin:12px 0" oninput="renderLibrary()">
+        <div id="libraryList"></div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="page" id="page-settings">
+      <div class="section-title">Settings & Backup</div>
+      <div class="card">
+        <strong style="font-size:13px">App Preferences</strong>
+        <div class="divider"></div>
+        <label class="field-label">CURRENCY</label>
+        <select class="field" id="currency" onchange="saveSettings()">
+          <option value="AED">AED – UAE Dirham</option>
+        </select>
+        <div class="divider"></div>
+        <button class="btn green" style="width:100%" onclick="backupJSON()">Export JSON Backup</button>
+        <div style="height:8px"></div>
+        <label class="btn light" style="display:block;text-align:center">
+          Import / Restore JSON
+          <input type="file" accept=".json,application/json" hidden onchange="restoreJSON(event)">
+        </label>
+        <div style="height:8px"></div>
+        <button class="btn light" style="width:100%" onclick="installApp()">Install App</button>
+        <p class="muted">On iPhone: open this app in Safari, tap Share, then choose “Add to Home Screen”.</p>
+      </div>
+      <div class="card">
+        <strong style="font-size:13px">Data Management</strong>
+        <p class="muted">Sales records and catalogue are saved on this device. Export a backup regularly before changing devices or clearing browser data.</p>
+        <button class="btn red" style="width:100%" onclick="resetData()">Reset All App Data</button>
+      </div>
+      <div class="card">
+        <strong style="font-size:13px">About</strong>
+        <p class="muted">VYSAKH Sales Tracker · Offline-ready sales and incentive tracker.</p>
+        <p class="muted">Version 1.0 · Currency AED</p>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-page="entries" onclick="showPage('entries')"><span class="nav-icon">▦</span>Entries</button>
+    <button class="nav-btn" data-page="history" onclick="showPage('history')"><span class="nav-icon">◷</span>History</button>
+    <button class="nav-btn" data-page="reports" onclick="showPage('reports')"><span class="nav-icon">▥</span>Reports</button>
+    <button class="nav-btn" data-page="library" onclick="showPage('library')"><span class="nav-icon">▤</span>Library</button>
+    <button class="nav-btn" data-page="settings" onclick="showPage('settings')"><span class="nav-icon">⚙</span>Settings</button>
+  </nav>
+
+  <div class="toast" id="toast">
+    <div id="toastMessage">Added to ledger</div>
+    <div class="toast-actions" id="toastActions"></div>
+  </div>
+
+  <div class="modal-backdrop" id="modalBackdrop" onclick="if(event.target===this)closeModal()">
+    <div class="modal">
+      <h3 id="modalTitle">Edit</h3>
+      <div id="modalBody"></div>
+      <div class="modal-actions" id="modalActions"></div>
+    </div>
+  </div>
+
+<script>
+"use strict";
+
+const STORAGE_KEY = "vysakhSalesTracker_v1";
+const BRANDS = ["ALL","W-H","K-V","H-A","P-P","PAX","G-R"];
+
+const DEFAULT_PRODUCTS = [
+  ["W-H","MAGNESIUM GLYCINATE","WHITE HEALTH MAGNESIUM GLYCINATE",189],
+  ["W-H","MAGNESIUM (PROMO)","WHITE HEALTH MAGNESIUM GLYCINATE (SALE)",143.50],
+  ["W-H","PROBIOTIC XTRA","WHITE HEALTH PROBIOTIC XTRA",310],
+  ["W-H","VITA C-1000 LIPO","WHITE HEALTH VITA C-1000 LIPOSOMAL",160],
+  ["W-H","SLIM DETOX CAPS","WHITE HEALTH SLIM DETOX CAPS",189],
+  ["W-H","COQ 10 30S","WHITE HEALTH COQ 10 30S",229.05],
+  ["W-H","COQ10 100MG 60S","WHITE HEALTH COQ10 100MG 60S",240],
+  ["W-H","VIT D3 FORTE","WHITE HEALTH VIT D3 FORTE",208],
+  ["W-H","OMEGA 3 TRIPLE","WHITE HEALTH OMEGA 3 TRIPLE STRENGTH 90S",275],
+
+  ["K-V","OMEGA 3 2000MG","KEENVITA OMEGA 3 2000MG",299],
+  ["K-V","MOVFLEX JOINT","KEENVITA MOVFLEX JOINT CARE",299],
+  ["K-V","MULTICOMPLETE","KEENVITA MULTICOMPLETE",225],
+  ["K-V","MAGNESIUM 500MG","KEENVITA MAGNESIUM GLYCINATE 500MG 60S",189],
+  ["K-V","VIT D3 5000 IU","KEENVITA VITAMIN D3 5000 IU 120 SOFTGELS",145],
+  ["K-V","COQ10 200MG","KEENVITA COQ10 200MG 60 CAPSULES",260],
+
+  ["H-A","HAIR VIT CAPS","HEALTH AID HAIR VIT CAPS",126],
+  ["H-A","KIDS PROBIO","HEALTH AID KIDS PROBIO",126],
+  ["H-A","FEMEMVIT TABS","HEALTH AID FEMEMVIT TABS",126],
+  ["H-A","MAGNESIUM BISGLY","HEALTH AID MAGNESIUM BISGLYCINATE",200],
+  ["H-A","MAGNESIUM 100","HEALTH AID MAGNESIUM BISGLYCINATE",100],
+  ["H-A","PSYLLIUM HUSK","HEALTH AID PSYLLIUM HUSK",152.25],
+  ["H-A","VITAMIN B50","HEALTH AID VITAMIN B50 COMPLEX",73.50],
+  ["H-A","VIT C ORANGE","HEALTH AID VIT C 1000MG EFF ORANGE",42.50],
+  ["H-A","VIT C BLKCRNT","HEALTH AID VIT C 1000MG EFF BLKCRNT",42.34],
+  ["H-A","ZIMACAL EFF","HEALTH AID ZIMACAL EFFERVESCENT",100],
+  ["H-A","KIDZ OMEGA LIQ","HEALTH AID KIDZ OMEGA LIQUID",157.50],
+  ["H-A","LIVER CARE TAB","HEALTH AID LIVER CARE TAB",220.50],
+  ["H-A","OSTEZOIN 90S","HEALTH AID OSTEZOIN TAB 90S",145],
+  ["H-A","CARBOSLIM 60S","HEALTH AID CARBOSLIM CAPS 60S",155],
+
+  ["P-P","COLLAGEN 1000MG","PURITAN'S PRIDE HYDROLYZED COLLAGEN 1000MG 180 TABS",165],
+  ["P-P","MELATONIN 3MG","PURITAN'S PRIDE MELATONIN 3MG 120 TABLETS",75],
+  ["P-P","BIOTIN 10000MCG","PURITAN'S PRIDE BIOTIN 10000 MCG 100 SOFTGELS",110],
+  ["P-P","L-CARNITINE 500","PURITAN'S PRIDE L-CARNITINE 500MG 60 TABLETS",135],
+  ["P-P","GLUCOSAMINE","PURITAN'S PRIDE GLUCOSAMINE CHONDROITIN COMPLEX 90S",145],
+  ["P-P","VIT C ROSE HIPS","PURITAN'S PRIDE VITAMIN C 1000MG WITH ROSE HIPS 100S",95],
+
+  ["PAX","TAUROPAX FORCE","TAUROPAX FORCE 60 CAPSULES",290],
+  ["PAX","BELLY FAT 120S","PAXAS BELLY FAT 120 CAPS",210],
+  ["PAX","SLIMMING EFF","PAXAS SLIMMING TABS 20 EFFERVESCENT",95],
+  ["PAX","SERENITY SHOTS","PAXAS SERENITY SHOTS 60ML",45],
+
+  ["G-R","VIRILE PERFORM","GLOW RADIANCE VIRILE ENHA PERFORM",252]
+].map((p,i)=>({id:"p"+i,brand:p[0],short:p[1],name:p[2],price:p[3]}));
+
+function todayISO() {
+  const d=new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+function uid() { return "id"+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function money(n) { return Number(n||0).toLocaleString("en-AE",{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function safeNumber(v) { const n=Number(v);return Number.isFinite(n)?n:0; }
+function escapeHTML(s) {
+  return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function formatDate(iso) {
+  if(!iso)return "";
+  const [y,m,d]=iso.split("-");
+  return `${d}-${m}-${y}`;
+}
+function formatShortDate(iso) {
+  if(!iso)return "";
+  const [y,m,d]=iso.split("-");
+  return `${d}${m}${y.slice(-2)}`;
+}
+function loadData() {
+  try {
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(raw) {
+      const saved=JSON.parse(raw);
+      return {
+        products:Array.isArray(saved.products)?saved.products:DEFAULT_PRODUCTS,
+        stores:Array.isArray(saved.stores)&&saved.stores.length?saved.stores:["Dubai Mall","Residence Tower","IBN Battuta"],
+        selectedStore:saved.selectedStore||"Dubai Mall",
+        dates:Array.isArray(saved.dates)?saved.dates:[],
+        rate:safeNumber(saved.rate)||10,
+        received:safeNumber(saved.received),
+        sentUpTo:saved.sentUpTo||"",
+        lastActivity:saved.lastActivity||"",
+        currency:saved.currency||"AED"
+      };
+    }
+  } catch(e) { console.warn("Could not load saved data",e); }
+  return {
+    products:DEFAULT_PRODUCTS.map(p=>({...p})),
+    stores:["Dubai Mall","Residence Tower","IBN Battuta"],
+    selectedStore:"Dubai Mall",dates:[],rate:10,received:0,
+    sentUpTo:"",lastActivity:"",currency:"AED"
+  };
+}
+let state=loadData();
+let activeBrand="ALL";
+let lastAdded=null;
+let toastTimer=null;
+let lastTap=0;
+let deferredInstallPrompt=null;
+
+function save() {
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+}
+function totalFor(date) {
+  return date.items.reduce((s,i)=>s+safeNumber(i.qty)*safeNumber(i.price),0);
+}
+function incentiveFor(date) {
+  return totalFor(date)*state.rate/100;
+}
+function allSales() { return state.dates.reduce((s,d)=>s+totalFor(d),0); }
+function allIncentive() { return state.dates.reduce((s,d)=>s+incentiveFor(d),0); }
+function allQty() { return state.dates.reduce((s,d)=>s+d.items.reduce((a,i)=>a+safeNumber(i.qty),0),0); }
+
+function showPage(page) {
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById("page-"+page).classList.add("active");
+  document.querySelectorAll(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
+  if(page==="history")renderHistory();
+  if(page==="reports")renderReports();
+  if(page==="library")renderLibrary();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function showToast(message,actions=[]) {
+  const box=document.getElementById("toast");
+  document.getElementById("toastMessage").textContent=message;
+  const actionBox=document.getElementById("toastActions");
+  actionBox.innerHTML="";
+  actions.forEach(a=>{
+    const b=document.createElement("button");
+    b.textContent=a.label;
+    b.onclick=()=>{a.action();hideToast();};
+    actionBox.appendChild(b);
+  });
+  box.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(hideToast,4500);
+}
+function hideToast() { document.getElementById("toast").classList.remove("show"); }
+
+function renderStores() {
+  const el=document.getElementById("storeTabs");
+  el.innerHTML=state.stores.map(s=>`
+    <button class="store-tab ${s===state.selectedStore?"selected":""}" onclick="selectStore('${escapeHTML(s).replace(/'/g,"&#39;")}')">${escapeHTML(s)}</button>
+  `).join("");
+}
+function selectStore(name) {
+  state.selectedStore=name;save();renderStores();
+}
+function manageStores() {
+  openModal("Manage Stores",`
+    <label class="field-label">ADD A STORE / PHARMACY</label>
+    <input class="field" id="newStoreName" placeholder="Enter store name">
+    <div class="divider"></div>
+    <div>${state.stores.map((s,i)=>`
+      <div class="product-row">
+        <span>${escapeHTML(s)}</span>
+        <div class="row">
+          <button class="btn light small-btn" onclick="renameStore(${i})">Rename</button>
+          <button class="btn red small-btn" onclick="deleteStore(${i})">Delete</button>
+        </div>
+      </div>`).join("")}</div>
+  `,[
+    {label:"Add Store",className:"green",action:()=>{
+      const n=document.getElementById("newStoreName").value.trim();
+      if(!n)return;
+      if(state.stores.some(s=>s.toLowerCase()===n.toLowerCase()))return showToast("Store already exists");
+      state.stores.push(n);state.selectedStore=n;save();closeModal();renderAll();
+    }},
+    {label:"Close",className:"light",action:closeModal}
+  ]);
+}
+function renameStore(i) {
+  const old=state.stores[i],n=prompt("Enter the new store name:",old);
+  if(!n||!n.trim())return;
+  const name=n.trim();
+  state.stores[i]=name;
+  state.dates.forEach(d=>{if(d.store===old)d.store=name;d.items.forEach(x=>{if(x.soldPlace===old)x.soldPlace=name;});});
+  if(state.selectedStore===old)state.selectedStore=name;
+  save();closeModal();renderAll();
+}
+function deleteStore(i) {
+  if(state.stores.length===1)return showToast("At least one store is required");
+  const old=state.stores[i];
+  if(!confirm("Remove "+old+" from the store list? Existing sales will remain."))return;
+  state.stores.splice(i,1);
+  if(state.selectedStore===old)state.selectedStore=state.stores[0];
+  save();closeModal();renderAll();
+}
+
+function renderChips() {
+  document.getElementById("brandChips").innerHTML=BRANDS.map(b=>`
+    <button class="chip ${activeBrand===b?"active":""}" onclick="setBrand('${b}')">${b}</button>
+  `).join("");
+}
+function setBrand(b) { activeBrand=b;renderChips();renderProducts(); }
+function renderProducts() {
+  const q=(document.getElementById("productSearch").value||"").toLowerCase().trim();
+  const list=state.products.filter(p=>
+    (activeBrand==="ALL"||p.brand===activeBrand)&&
+    (!q||`${p.name} ${p.short} ${p.brand}`.toLowerCase().includes(q))
+  );
+  document.getElementById("productGrid").innerHTML=list.length?list.map(p=>`
+    <button class="tile" onclick="quickAdd('${p.id}')">
+      <span class="tile-brand">${escapeHTML(p.brand)}</span>
+      <span class="tile-name">${escapeHTML(p.short)}</span>
+      <span class="tile-price">AED ${money(p.price)}</span>
+    </button>
+  `).join(""):`<div class="empty" style="grid-column:1/-1">No matching products found.</div>`;
+}
+
+function getOrCreateToday() {
+  let d=state.dates.find(x=>x.date===todayISO()&&x.store===state.selectedStore);
+  if(!d) {
+    d={id:uid(),date:todayISO(),store:state.selectedStore,items:[]};
+    state.dates.push(d);
+  }
+  return d;
+}
+function quickAdd(productId) {
+  const now=Date.now();
+  if(now-lastTap<450)return;
+  lastTap=now;
+  const p=state.products.find(x=>x.id===productId);
+  if(!p)return;
+  const d=getOrCreateToday();
+  let item=d.items.find(x=>x.productId===p.id&&safeNumber(x.price)===safeNumber(p.price)&&x.soldPlace===state.selectedStore);
+  if(item)item.qty=safeNumber(item.qty)+1;
+  else {
+    item={id:uid(),productId:p.id,name:p.name,qty:1,price:p.price,soldPlace:state.selectedStore};
+    d.items.push(item);
+  }
+  lastAdded={dateId:d.id,itemId:item.id};
+  save();renderLedger();renderTotals();
+  showToast(`${p.short} · Qty ${item.qty} · AED ${money(item.qty*item.price)}`,[
+    {label:"UNDO",action:undoLast},
+    {label:"−1 QTY",action:()=>adjustLast(-1)},
+    {label:"+1 QTY",action:()=>adjustLast(1)},
+    {label:"EDIT",action:()=>editLast()}
+  ]);
+}
+function findLast() {
+  if(!lastAdded)return {};
+  const d=state.dates.find(x=>x.id===lastAdded.dateId);
+  const item=d?.items.find(x=>x.id===lastAdded.itemId);
+  return {d,item};
+}
+function undoLast() {
+  const {d,item}=findLast();
+  if(!d||!item)return;
+  d.items=d.items.filter(x=>x.id!==item.id);
+  if(!d.items.length)state.dates=state.dates.filter(x=>x.id!==d.id);
+  lastAdded=null;save();renderAll();showToast("Last entry undone");
+}
+function adjustLast(n) {
+  const {d,item}=findLast();
+  if(!d||!item)return;
+  item.qty=Math.max(0,safeNumber(item.qty)+n);
+  if(item.qty===0)d.items=d.items.filter(x=>x.id!==item.id);
+  if(!d.items.length)state.dates=state.dates.filter(x=>x.id!==d.id);
+  save();renderAll();showToast("Quantity updated");
+}
+function editLast() {
+  const {d,item}=findLast();
+  if(!d||!item)return;
+  editItem(d.id,item.id);
+}
+
+function addDateBlock() {
+  const d={id:uid(),date:todayISO(),store:state.selectedStore,items:[]};
+  state.dates.push(d);save();renderAll();
+  showToast("New date block added");
+}
+function addItemToDate(dateId) {
+  const d=state.dates.find(x=>x.id===dateId);
+  if(!d)return;
+  openModal("Add Ledger Item",`
+    <label class="field-label">ITEM NAME</label>
+    <input class="field" id="manualName" placeholder="Product name">
+    <div class="form-grid" style="margin-top:10px">
+      <div><label class="field-label">QUANTITY</label><input class="field" id="manualQty" type="number" step="0.001" value="1"></div>
+      <div><label class="field-label">UNIT PRICE (AED)</label><input class="field" id="manualPrice" type="number" step="0.01" value="0"></div>
+    </div>
+    <label class="field-label" style="margin-top:10px">SOLD PLACE</label>
+    <input class="field" id="manualPlace" value="${escapeHTML(d.store)}">
+  `,[
+    {label:"Add Item",className:"green",action:()=>{
+      const name=document.getElementById("manualName").value.trim();
+      if(!name)return showToast("Enter an item name");
+      d.items.push({id:uid(),name,qty:safeNumber(document.getElementById("manualQty").value)||1,price:safeNumber(document.getElementById("manualPrice").value),soldPlace:document.getElementById("manualPlace").value.trim()||d.store});
+      save();closeModal();renderAll();
+    }},
+    {label:"Cancel",className:"light",action:closeModal}
+  ]);
+}
+function editItem(dateId,itemId) {
+  const d=state.dates.find(x=>x.id===dateId);
+  const item=d?.items.find(x=>x.id===itemId);
+  if(!item)return;
+  openModal("Edit Sales Item",`
+    <label class="field-label">ITEM NAME</label>
+    <input class="field" id="editName" value="${escapeHTML(item.name)}">
+    <div class="form-grid" style="margin-top:10px">
+      <div><label class="field-label">QUANTITY</label><input class="field" id="editQty" type="number" step="0.001" value="${item.qty}"></div>
+      <div><label class="field-label">UNIT PRICE (AED)</label><input class="field" id="editPrice" type="number" step="0.01" value="${item.price}"></div>
+    </div>
+    <label class="field-label" style="margin-top:10px">SOLD PLACE</label>
+    <input class="field" id="editPlace" value="${escapeHTML(item.soldPlace||d.store)}">
+  `,[
+    {label:"Save Changes",className:"green",action:()=>{
+      item.name=document.getElementById("editName").value.trim()||item.name;
+      item.qty=Math.max(0,safeNumber(document.getElementById("editQty").value));
+      item.price=Math.max(0,safeNumber(document.getElementById("editPrice").value));
+      item.soldPlace=document.getElementById("editPlace").value.trim();
+      if(item.qty===0)d.items=d.items.filter(x=>x.id!==item.id);
+      if(!d.items.length)state.dates=state.dates.filter(x=>x.id!==d.id);
+      save();closeModal();renderAll();
+    }},
+    {label:"Cancel",className:"light",action:closeModal}
+  ]);
+}
+function deleteItem(dateId,itemId) {
+  if(!confirm("Delete this sales item?"))return;
+  const d=state.dates.find(x=>x.id===dateId);
+  if(!d)return;
+  d.items=d.items.filter(x=>x.id!==itemId);
+  if(!d.items.length)state.dates=state.dates.filter(x=>x.id!==dateId);
+  save();renderAll();
+}
+function deleteDate(dateId) {
+  if(!confirm("Delete this entire date and its sales records?"))return;
+  state.dates=state.dates.filter(d=>d.id!==dateId);
+  save();renderAll();
+}
+function changeRate(v) {
+  state.rate=Math.min(100,Math.max(1,safeNumber(v)||10));
+  document.getElementById("incentiveRate").value=state.rate;
+  save();renderLedger();renderTotals();
+}
+
+function renderLedger() {
+  const root=document.getElementById("ledger");
+  const dates=[...state.dates].sort((a,b)=>b.date.localeCompare(a.date));
+  if(!dates.length) {
+    root.innerHTML='<div class="card empty">No sales entries yet.<br>Tap a product tile above to start.</div>';
+    return;
+  }
+  root.innerHTML=dates.map(d=>{
+    const sum=totalFor(d),inc=incentiveFor(d),qty=d.items.reduce((a,x)=>a+safeNumber(x.qty),0);
+    const rows=d.items.map(item=>{
+      const line=safeNumber(item.qty)*safeNumber(item.price);
+      return `<tr>
+        <td class="item-cell"><input aria-label="Item name" value="${escapeHTML(item.name)}" onchange="updateItem('${d.id}','${item.id}','name',this.value)"></td>
+        <td><div class="qty-control">
+          <button onclick="changeItemQty('${d.id}','${item.id}',-1)">−</button>
+          <input aria-label="Quantity" type="number" step="0.001" value="${item.qty}" onchange="updateItem('${d.id}','${item.id}','qty',this.value)">
+          <button onclick="changeItemQty('${d.id}','${item.id}',1)">＋</button>
+        </div></td>
+        <td><input aria-label="Unit price" type="number" step="0.01" value="${item.price}" onchange="updateItem('${d.id}','${item.id}','price',this.value)"></td>
+        <td><strong>${money(line)}</strong></td>
+        <td>${money(line*state.rate/100)}</td>
+        <td>${money(line)}</td>
+        <td><input aria-label="Sold place" value="${escapeHTML(item.soldPlace||d.store)}" onchange="updateItem('${d.id}','${item.id}','soldPlace',this.value)"></td>
+        <td><button class="btn red small-btn" onclick="deleteItem('${d.id}','${item.id}')">×</button></td>
+      </tr>`;
+    }).join("");
+    return `<div class="card date-block" style="padding:0;overflow:hidden">
+      <div class="date-banner">
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <span class="small">STORE</span>
+          <input value="${escapeHTML(d.store)}" aria-label="Store name" onchange="updateDateStore('${d.id}',this.value)">
+        </div>
+        <div>
+          <span class="small">DATE</span><br>
+          <input type="date" value="${d.date}" onchange="updateDateValue('${d.id}',this.value)">
+          <span class="date-text">${formatDate(d.date)}</span>
+        </div>
+        <div class="date-actions">
+          <button onclick="shareDate('${d.id}')">WA</button>
+          <button onclick="addItemToDate('${d.id}')">＋ ITEM</button>
+          <button onclick="deleteDate('${d.id}')">DELETE</button>
+        </div>
+      </div>
+      <div class="ledger-scroll">
+        <table>
+          <thead><tr>
+            <th>ITEM</th><th>QTY</th><th>UNIT PRICE</th><th>TOTAL</th>
+            <th>INCENTIVE ${state.rate}%</th><th>DAY SALES</th><th>SOLD PLACE</th><th></th>
+          </tr></thead>
+          <tbody>${rows}
+            <tr class="subtotal">
+              <td>TOTAL</td><td>${qty}</td><td></td><td>${money(sum)}</td>
+              <td>${money(inc)}</td><td>${money(sum)}</td><td colspan="2"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+  }).join("");
+}
+function updateItem(dateId,itemId,key,value) {
+  const d=state.dates.find(x=>x.id===dateId),item=d?.items.find(x=>x.id===itemId);
+  if(!item)return;
+  if(key==="qty"||key==="price")item[key]=Math.max(0,safeNumber(value));
+  else item[key]=value;
+  save();renderLedger();renderTotals();
+}
+function changeItemQty(dateId,itemId,n) {
+  const d=state.dates.find(x=>x.id===dateId),item=d?.items.find(x=>x.id===itemId);
+  if(!item)return;
+  item.qty=Math.max(0,safeNumber(item.qty)+n);
+  if(!item.qty)d.items=d.items.filter(x=>x.id!==itemId);
+  if(!d.items.length)state.dates=state.dates.filter(x=>x.id!==dateId);
+  save();renderAll();
+}
+function updateDateStore(id,value) {
+  const d=state.dates.find(x=>x.id===id);if(!d)return;
+  d.store=value.trim()||d.store;save();renderStores();renderLedger();
+}
+function updateDateValue(id,value) {
+  const d=state.dates.find(x=>x.id===id);if(!d||!value)return;
+  d.date=value;save();renderAll();
+}
+function renderTotals() {
+  document.getElementById("topSalesTotal").textContent=state.currency+" "+money(allSales());
+  document.getElementById("grandSales").textContent=state.currency+" "+money(allSales());
+  document.getElementById("grandIncentive").textContent=state.currency+" "+money(allIncentive());
+}
+
+function openModal(title,body,actions=[]) {
+  document.getElementById("modalTitle").textContent=title;
+  document.getElementById("modalBody").innerHTML=body;
+  const a=document.getElementById("modalActions");
+  a.innerHTML="";
+  actions.forEach(x=>{
+    const b=document.createElement("button");
+    b.className="btn "+(x.className||"light");
+    b.textContent=x.label;b.onclick=x.action;a.appendChild(b);
+  });
+  document.getElementById("modalBackdrop").classList.add("show");
+}
+function closeModal() { document.getElementById("modalBackdrop").classList.remove("show"); }
+
+function openProductModal(productId=null) {
+  const p=productId?state.products.find(x=>x.id===productId):null;
+  openModal(p?"Edit Product":"Add Product",`
+    <label class="field-label">BRAND CODE</label>
+    <select class="field" id="productBrand">${BRANDS.filter(x=>x!=="ALL").map(x=>`<option ${p?.brand===x?"selected":""}>${x}</option>`).join("")}</select>
+    <label class="field-label" style="margin-top:10px">SHORT NAME</label>
+    <input class="field" id="productShort" value="${escapeHTML(p?.short||"")}" placeholder="Short tile name">
+    <label class="field-label" style="margin-top:10px">FULL PRODUCT NAME</label>
+    <input class="field" id="productName" value="${escapeHTML(p?.name||"")}" placeholder="Full product name">
+    <label class="field-label" style="margin-top:10px">UNIT PRICE (AED)</label>
+    <input class="field" id="productPrice" type="number" step="0.01" value="${p?.price??""}" placeholder="0.00">
+  `,[
+    {label:"Save Product",className:"green",action:()=>{
+      const brand=document.getElementById("productBrand").value;
+      const short=document.getElementById("productShort").value.trim();
+      const name=document.getElementById("productName").value.trim();
+      const price=Math.max(0,safeNumber(document.getElementById("productPrice").value));
+      if(!short||!name)return showToast("Enter the short name and full name");
+      if(p)Object.assign(p,{brand,short,name,price});
+      else state.products.push({id:uid(),brand,short,name,price});
+      save();closeModal();renderAll();
+    }},
+    {label:"Cancel",className:"light",action:closeModal}
+  ]);
+}
+function renderLibrary() {
+  const q=(document.getElementById("librarySearch")?.value||"").toLowerCase();
+  const products=state.products.filter(p=>`${p.name} ${p.short} ${p.brand}`.toLowerCase().includes(q));
+  document.getElementById("libraryList").innerHTML=products.length?products.map(p=>`
+    <div class="product-row">
+      <div style="min-width:0">
+        <strong>${escapeHTML(p.short)}</strong>
+        <div class="muted">${escapeHTML(p.brand)} · ${escapeHTML(p.name)}</div>
+        <strong style="color:var(--green-dark)">AED ${money(p.price)}</strong>
+      </div>
+      <div class="row">
+        <button class="btn light small-btn" onclick="openProductModal('${p.id}')">Edit</button>
+        <button class="btn red small-btn" onclick="deleteProduct('${p.id}')">×</button>
+      </div>
+    </div>`).join(""):'<div class="empty">No products found.</div>';
+}
+function deleteProduct(id) {
+  if(!confirm("Delete this product from the catalogue? Existing ledger entries will remain."))return;
+  state.products=state.products.filter(p=>p.id!==id);
+  save();renderAll();
+}
+
+function shareText(text) {
+  const url="https://wa.me/?text="+encodeURIComponent(text);
+  window.open(url,"_blank","noopener");
+  state.lastActivity="WhatsApp share opened · "+new Date().toLocaleString();
+  save();
+  const el=document.getElementById("lastActivity");if(el)el.textContent=state.lastActivity;
+}
+function makeDateWhatsApp(d) {
+  const lines=[formatShortDate(d.date)];
+  d.items.forEach(i=>lines.push(`${i.name}*${i.qty} - ${money(i.qty*i.price)}`));
+  lines.push(`Total - ${money(totalFor(d))}`);
+  return lines.join("\n");
+}
+function shareDate(id) {
+  const d=state.dates.find(x=>x.id===id);if(!d)return;
+  shareText(makeDateWhatsApp(d));
+}
+function copyAllWhatsApp() {
+  const text=[...state.dates].sort((a,b)=>a.date.localeCompare(b.date)).map(makeDateWhatsApp).join("\n\n");
+  if(!text)return showToast("No sales records to share");
+  copyText(text);
+}
+function copyText(text) {
+  const done=()=>{
+    state.lastActivity="Copied · "+new Date().toLocaleString();
+    save();
+    showToast("Copied successfully");
+  };
+  if(navigator.clipboard?.writeText)navigator.clipboard.writeText(text).then(done).catch(()=>fallbackCopy(text,done));
+  else fallbackCopy(text,done);
+}
+function fallbackCopy(text,done) {
+  const ta=document.createElement("textarea");ta.value=text;
+  ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);
+  ta.select();
+  try{document.execCommand("copy");done();}catch(e){showToast("Copy failed. Please try again.");}
+  ta.remove();
+}
+function saveHistorySettings() {
+  state.sentUpTo=document.getElementById("sentUpTo").value;
+  state.received=Math.max(0,safeNumber(document.getElementById("amountReceived").value));
+  save();renderHistory();
+}
+function renderHistory() {
+  document.getElementById("sentUpTo").value=state.sentUpTo;
+  document.getElementById("amountReceived").value=state.received||"";
+  document.getElementById("histIncentive").textContent=money(allIncentive());
+  document.getElementById("histReceived").textContent=money(state.received);
+  document.getElementById("histPending").textContent=money(allIncentive()-state.received);
+  document.getElementById("histSales").textContent=money(allSales());
+  document.getElementById("lastActivity").textContent=state.lastActivity||"No report copied or shared yet.";
+  const month=document.getElementById("historyMonth").value;
+  const dates=[...state.dates].filter(d=>!month||d.date.startsWith(month)).sort((a,b)=>b.date.localeCompare(a.date));
+  document.getElementById("historyList").innerHTML=dates.length?dates.map(d=>{
+    const sent=state.sentUpTo&&d.date<=state.sentUpTo;
+    return `<div class="history-item">
+      <div class="row between">
+        <strong>${formatDate(d.date)}</strong>
+        <span class="status ${sent?"sent":""}">${sent?"✓ REPORT SENT":"PENDING REPORT"}</span>
+      </div>
+      <div class="muted" style="margin:5px 0">${escapeHTML(d.store)} · ${d.items.length} items</div>
+      <div class="row between">
+        <strong>AED ${money(totalFor(d))}</strong>
+        <button class="btn light small-btn" onclick="shareDate('${d.id}')">WhatsApp Date</button>
+      </div>
+    </div>`;
+  }).join(""):'<div class="empty">No saved dates for this period.</div>';
+}
+function renderReports() {
+  const period=document.getElementById("reportPeriod").value;
+  const now=new Date();
+  let dates=state.dates.filter(d=>{
+    const dt=new Date(d.date+"T12:00:00");
+    if(period==="month")return dt.getFullYear()===now.getFullYear()&&dt.getMonth()===now.getMonth();
+    if(period==="week")return (now-dt)/(86400000)<=7&&(now-dt)>=0;
+    return true;
+  });
+  const sales=dates.reduce((s,d)=>s+totalFor(d),0);
+  const inc=dates.reduce((s,d)=>s+incentiveFor(d),0);
+  const qty=dates.reduce((s,d)=>s+d.items.reduce((a,i)=>a+safeNumber(i.qty),0),0);
+  document.getElementById("reportSales").textContent=money(sales);
+  document.getElementById("reportIncentive").textContent=money(inc);
+  document.getElementById("reportQty").textContent=qty;
+  document.getElementById("reportDays").textContent=dates.length;
+
+  const productTotals={};
+  dates.forEach(d=>d.items.forEach(i=>{
+    productTotals[i.name]=(productTotals[i.name]||0)+safeNumber(i.qty)*safeNumber(i.price);
+  }));
+  const top=Object.entries(productTotals).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  document.getElementById("topProducts").innerHTML=top.length?top.map(([n,v],i)=>`
+    <div class="product-row"><span>${i+1}. ${escapeHTML(n)}</span><strong>AED ${money(v)}</strong></div>
+  `).join(""):'<div class="empty">No product sales recorded.</div>';
+
+  const months={};
+  state.dates.forEach(d=>{
+    const m=d.date.slice(0,7);months[m]=(months[m]||0)+totalFor(d);
+  });
+  const sorted=Object.entries(months).sort((a,b)=>b[0].localeCompare(a[0]));
+  document.getElementById("monthlyReports").innerHTML=sorted.length?sorted.map(([m,v])=>`
+    <div class="product-row"><span>${m}</span><strong>AED ${money(v)}</strong></div>
+  `).join(""):'<div class="empty">Monthly reports will appear here.</div>';
+}
+
+function makeTSV() {
+  const blocks=[];
+  [...state.dates].sort((a,b)=>a.date.localeCompare(b.date)).forEach(d=>{
+    const lines=[];
+    lines.push(["STORE",d.store,"DATE",formatDate(d.date)].join("\t"));
+    lines.push(["ITEM","QTY","UNIT PRICE (AED)","TOTAL (AED)",`INCENTIVE ${state.rate}% (AED)`,"DAY SALES","SOLD PLACE"].join("\t"));
+    d.items.forEach(i=>{
+      const total=safeNumber(i.qty)*safeNumber(i.price);
+      lines.push([i.name,i.qty,money(i.price),money(total),money(total*state.rate/100),money(total),i.soldPlace||d.store].join("\t"));
+    });
+    const qty=d.items.reduce((s,i)=>s+safeNumber(i.qty),0);
+    lines.push(["TOTAL",qty,"",money(totalFor(d)),money(incentiveFor(d)),money(totalFor(d)),""].join("\t"));
+    blocks.push(lines.join("\n"));
+  });
+  return blocks.join("\n\n");
+}
+function exportTSV() { copyText(makeTSV()); }
+function exportCSV() {
+  const tsv=makeTSV();
+  if(!tsv)return showToast("No data to export");
+  const csv=tsv.split("\n").map(line=>line.split("\t").map(v=>`"${v.replace(/"/g,'""')}"`).join(",")).join("\r\n");
+  downloadFile(csv,"vysakh-sales.csv","text/csv;charset=utf-8");
+}
+function downloadFile(content,name,type) {
+  const blob=new Blob([content],{type});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");a.href=url;a.download=name;a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function pasteImport() {
+  openModal("Paste Sales Data",`
+    <p class="muted">Paste tab-separated or comma-separated sales data. You can paste the app's exported ledger format or a simple list with date, time, description, quantity and price.</p>
+    <textarea id="importText" class="field" rows="9" placeholder="Paste your data here..."></textarea>
+  `,[
+    {label:"Import Data",className:"green",action:()=>{
+      const text=document.getElementById("importText").value.trim();
+      if(!text)return showToast("Paste data first");
+      const count=importRows(text);
+      save();closeModal();renderAll();showToast(count+" item(s) imported");
+    }},
+    {label:"Cancel",className:"light",action:closeModal}
+  ]);
+}
+function importRows(text) {
+  const lines=text.replace(/\r/g,"").split("\n").filter(x=>x.trim());
+  let currentDate=todayISO(),currentStore=state.selectedStore,count=0,insideAppFormat=false;
+  for(const line of lines) {
+    const cells=line.includes("\t")?line.split("\t"):parseCSVLine(line);
+    const first=(cells[0]||"").trim();
+    if(first.toUpperCase()==="STORE") {
+      currentStore=(cells[1]||state.selectedStore).trim();
+      const dateText=(cells[3]||"").trim();
+      currentDate=parseImportedDate(dateText)||currentDate;
+      insideAppFormat=true;
+      continue;
+    }
+    if(first.toUpperCase()==="ITEM"||first.toUpperCase()==="TOTAL"||first.toUpperCase()==="DATE")continue;
+    let name="",qty=1,price=0,place=currentStore,date=currentDate;
+    if(insideAppFormat&&cells.length>=4) {
+      name=first;qty=safeNumber(cells[1]);price=safeNumber(cells[2]);
+      place=(cells[6]||currentStore).trim()||currentStore;
+    } else if(cells.length>=5) {
+      // DATE | TIME | DESCRIPTION | QTY | PRICE
+      date=parseImportedDate(cells[0])||currentDate;
+      name=(cells[2]||"").trim();qty=safeNumber(cells[3]);price=safeNumber(cells[4]);
+    } else if(cells.length>=3) {
+      name=(cells[0]||"").trim();qty=safeNumber(cells[1]);price=safeNumber(cells[2]);
+    }
+    if(!name||!qty||!Number.isFinite(price))continue;
+    let d=state.dates.find(x=>x.date===date&&x.store===currentStore);
+    if(!d){d={id:uid(),date,store:currentStore,items:[]};state.dates.push(d);}
+    d.items.push({id:uid(),name,qty,price,soldPlace:place});
+    count++;
+  }
+  return count;
+}
+function parseImportedDate(value) {
+  if(!value)return null;
+  let m=value.match(/^(\d{2})-(\d{2})-(\d{4})$/);
+  if(m)return `${m[3]}-${m[2]}-${m[1]}`;
+  m=value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if(m)return `${m[3]}-${m[2]}-${m[1]}`;
+  m=value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(m)return `${m[1]}-${m[2]}-${m[3]}`;
+  const d=new Date(value);
+  return Number.isNaN(d.getTime())?null:todayISOFromDate(d);
+}
+function todayISOFromDate(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+function parseCSVLine(line) {
+  const out=[];let cur="",quoted=false;
+  for(let i=0;i<line.length;i++){
+    const c=line[i];
+    if(c==='"'&&line[i+1]==='"'&&quoted){cur+='"';i++;}
+    else if(c==='"')quoted=!quoted;
+    else if(c===","&&!quoted){out.push(cur);cur="";}
+    else cur+=c;
+  }
+  out.push(cur);return out;
+}
+
+function exportImage() {
+  const dates=[...state.dates].sort((a,b)=>a.date.localeCompare(b.date));
+  if(!dates.length)return showToast("No ledger data to capture");
+  const scale=2,rowH=36,pad=28,width=1050;
+  let height=100;
+  dates.forEach(d=>height+=90+d.items.length*rowH+rowH+25);
+  height+=70;
+  const canvas=document.createElement("canvas");
+  canvas.width=width*scale;canvas.height=height*scale;
+  const ctx=canvas.getContext("2d");ctx.scale(scale,scale);
+  ctx.fillStyle="#f0f4fb";ctx.fillRect(0,0,width,height);
+  ctx.fillStyle="#0a1e3c";ctx.font="bold 26px Arial";ctx.fillText("VYSAKH SALES TRACKER",pad,40);
+  ctx.font="14px Arial";ctx.fillStyle="#718096";ctx.fillText("Sales Ledger · "+state.currency, pad,64);
+  let y=90;
+  dates.forEach(d=>{
+    ctx.fillStyle="#0a1e3c";ctx.fillRect(pad,y,width-pad*2,34);
+    ctx.fillStyle="#fff";ctx.font="bold 13px Arial";
+    ctx.fillText(d.store+"  ·  "+formatDate(d.date),pad+12,y+22);
+    y+=45;
+    const headers=["ITEM","QTY","UNIT PRICE","TOTAL","INCENTIVE","DAY SALES","SOLD PLACE"];
+    const xs=[pad+8,490,560,660,760,870,960];
+    ctx.fillStyle="#52627a";ctx.font="bold 10px Arial";
+    headers.forEach((h,i)=>ctx.fillText(h,xs[i],y));
+    y+=12;
+    d.items.forEach((it,index)=>{
+      y+=rowH;
+      ctx.fillStyle=index%2?"#ffffff":"#f8fafc";ctx.fillRect(pad,y-rowH+4,width-pad*2,rowH);
+      const line=it.qty*it.price;
+      ctx.fillStyle="#17243a";ctx.font="11px Arial";
+      ctx.fillText(it.name.slice(0,58),xs[0],y-9);
+      ctx.fillText(String(it.qty),xs[1],y-9);
+      ctx.fillText(money(it.price),xs[2],y-9);
+      ctx.fillText(money(line),xs[3],y-9);
+      ctx.fillText(money(line*state.rate/100),xs[4],y-9);
+      ctx.fillText(money(line),xs[5],y-9);
+      ctx.fillText((it.soldPlace||d.store).slice(0,18),xs[6],y-9);
+    });
+    y+=rowH;
+    ctx.fillStyle="#e3f3eb";ctx.fillRect(pad,y-rowH+4,width-pad*2,rowH);
+    ctx.fillStyle="#18794f";ctx.font="bold 12px Arial";
+    ctx.fillText("TOTAL",pad+8,y-9);
+    ctx.fillText(money(totalFor(d)),xs[3],y-9);
+    ctx.fillText(money(incentiveFor(d)),xs[4],y-9);
+    y+=30;
+  });
+  ctx.fillStyle="#0a1e3c";ctx.fillRect(pad,y,width-pad*2,48);
+  ctx.fillStyle="#fff";ctx.font="bold 15px Arial";
+  ctx.fillText("GRAND TOTAL: AED "+money(allSales()),pad+12,y+29);
+  ctx.fillText("INCENTIVE: AED "+money(allIncentive()),pad+530,y+29);
+  canvas.toBlob(blob=>{
+    if(!blob)return showToast("Could not create image");
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");a.href=url;a.download="vysakh-sales-ledger.jpg";a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),1500);
+    showToast("Ledger image created");
+  },"image/jpeg",.94);
+}
+
+function backupJSON() {
+  const payload={...state,backupCreated:new Date().toISOString(),app:"VYSAKH Sales Tracker"};
+  downloadFile(JSON.stringify(payload,null,2),"vysakh-sales-backup.json","application/json");
+}
+function restoreJSON(event) {
+  const file=event.target.files?.[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try {
+      const data=JSON.parse(reader.result);
+      if(!Array.isArray(data.dates)||!Array.isArray(data.products))throw new Error("Invalid backup");
+      if(!confirm("Restore this backup? Current app data will be replaced."))return;
+      state={
+        products:data.products,
+        stores:Array.isArray(data.stores)&&data.stores.length?data.stores:["Dubai Mall"],
+        selectedStore:data.selectedStore||"Dubai Mall",
+        dates:data.dates,
+        rate:safeNumber(data.rate)||10,
+        received:safeNumber(data.received),
+        sentUpTo:data.sentUpTo||"",
+        lastActivity:data.lastActivity||"",
+        currency:"AED"
+      };
+      save();renderAll();showToast("Backup restored successfully");
+    } catch(e){showToast("Invalid backup file");}
+  };
+  reader.readAsText(file);
+}
+function resetData() {
+  if(!confirm("This will permanently delete all sales, products and settings stored on this device. Continue?"))return;
+  localStorage.removeItem(STORAGE_KEY);
+  state={
+    products:DEFAULT_PRODUCTS.map(p=>({...p})),
+    stores:["Dubai Mall","Residence Tower","IBN Battuta"],
+    selectedStore:"Dubai Mall",dates:[],rate:10,received:0,
+    sentUpTo:"",lastActivity:"",currency:"AED"
+  };
+  save();renderAll();showToast("App data reset");
+}
+function saveSettings() {
+  state.currency=document.getElementById("currency").value;
+  save();renderAll();
+}
+function installApp() {
+  if(deferredInstallPrompt) {
+    deferredInstallPrompt.prompt();
+    deferredInstallPrompt.userChoice.then(()=>{deferredInstallPrompt=null;});
+  } else {
+    showToast("On iPhone, use Safari Share → Add to Home Screen. On Android, use browser menu → Install app.");
+  }
+}
+window.addEventListener("beforeinstallprompt",e=>{
+  e.preventDefault();deferredInstallPrompt=e;
+});
+window.addEventListener("appinstalled",()=>showToast("App installed"));
+
+function renderAll() {
+  renderStores();renderChips();renderProducts();renderLedger();renderTotals();
+  renderHistory();renderReports();renderLibrary();
+  document.getElementById("incentiveRate").value=state.rate;
+  document.getElementById("currency").value=state.currency;
+}
+function updateConnection() {
+  const el=document.getElementById("connectionBadge");
+  el.textContent=navigator.onLine?"ONLINE":"OFFLINE";
+  el.style.color=navigator.onLine?"#b8f6d8":"#ffe1a6";
+}
+window.addEventListener("online",updateConnection);
+window.addEventListener("offline",updateConnection);
+
+if("serviceWorker" in navigator) {
+  window.addEventListener("load",()=>{
+    navigator.serviceWorker.register("./sw.js").catch(err=>console.log("Service worker unavailable",err));
+  });
+}
+
+renderAll();
+updateConnection();
+</script>
+</body>
+</html>
